@@ -1,0 +1,376 @@
+openapi: "3.0.3"
+info:
+  version: 1.0.0
+  title: Lankheet Domotics api
+  description: Lankheet Domotics API
+servers:
+  - url: /rest/lds-iot-rest/v1
+security:
+  - Bearer: [ ]
+tags:
+  - name: SiteConfig
+  - name: Device
+paths:
+  /site:
+    post:
+      tags:
+        - Site
+      summary: Add a new site
+      operationId: addSiteConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Site'
+      responses:
+        200:
+          description: Site configuration saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Site'
+  /site/{siteId}:
+    get:
+      tags:
+        - Site
+      summary: Get configuration of a site
+      operationId: getConfigSite
+      parameters:
+        - name: siteId
+          in: path
+          description: site identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Site configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Site'
+    put:
+      tags:
+        - Site
+      summary: Update configuration of a site
+      operationId: updateConfigSite
+      parameters:
+        - name: siteId
+          in: path
+          description: site identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Site'
+      responses:
+        200:
+          description: Site configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Site'
+  /site/{siteId}/devices:
+    get:
+      tags:
+        - Device
+      summary: Get all device configurations of a site
+      operationId: getSiteDevices
+      parameters:
+        - name: siteId
+          in: path
+          description: site identification
+          required: true
+          schema:
+            type: number
+      responses:
+        200:
+          description: Device configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+    post:
+      tags:
+        - Device
+      summary: Add devices to a site
+      operationId: addDevices
+      parameters:
+        - name: siteId
+          in: path
+          description: site identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Device'
+      responses:
+        200:
+          description: Device configuration is updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+  /site/{siteId}/devices/{deviceId}:
+    get:
+      tags:
+        - Device
+      summary: Get the configuration of a device
+      operationId: getDevice
+      parameters:
+        - name: siteId
+          in: path
+          description: site identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: deviceId
+          in: path
+          description: The device identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Device configuration
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+    put:
+      tags:
+        - Device
+      summary: Update a device configuration
+      operationId: updateDevice
+      parameters:
+        - name: siteId
+          in: path
+          description: site identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: deviceId
+          in: path
+          description: The device identification
+          required: true
+          schema:
+            type: object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        200:
+          description: Device configuration is updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+components:
+  schemas:
+    id:
+      type: number
+      format: int64
+      readOnly: true
+      description: 'unique identification'
+    user:
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        permissions:
+          items:
+            $ref: '#/components/schemas/permission'
+        siteId:
+          type: number
+          format: int64
+    permission:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          parameter:
+            type: string
+            description: 'The permission'
+          value:
+            type: boolean
+    Site:
+      type: object
+      properties:
+        siteId:
+          $ref: '#/components/schemas/id'
+        name:
+          type: string
+        description:
+          type: string
+        dtCreated:
+          format: date-time
+          type: string
+        mqttConfig:
+          $ref: '#/components/schemas/MqttConfig'
+        P1Config:
+          $ref: '#/components/schemas/PowermeterConfig'
+        SerialConfig:
+          $ref: '#/components/schemas/SerialConfig'
+    PowermeterConfig:
+      type: object
+      properties:
+        repeatValuesAfter:
+          type: integer
+          description: 'After how many seconds will all values be sent instead of only the changed ones'
+        internalQueueSize:
+          type: integer
+          description: 'How many values can be stored internally before values are lost'
+    SerialConfig:
+      type: object
+      properties:
+        p1Key:
+          type: string
+          description: 'unique key of the smart meter'
+        serialPort:
+          type: string
+          description: 'serial port used on the system e.g. /dev/ttyUSB0'
+        baudRate:
+          type: integer
+          description: 'the baudrate of the serial port, 115200'
+    Device:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        macAddress:
+          type: string
+          description: 'The physical address of the device'
+        sensors:
+          items:
+            $ref: '#/components/schemas/Sensor'
+        actuators:
+          items:
+            $ref: '#/components/schemas/Actuator'
+    Sensor:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        type:
+          $ref: '#/components/schemas/SensorType'
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              parameter:
+                type: string
+              value:
+                type: number
+    SensorType:
+      type: string
+      enum: [ TEMP, HUMID, POWER, GAS_METER, GAS_SENSOR ]
+      x-enumNames: [ TEMPERATURE, HUMIDITY, POWER_METER, GAS_METER, GAS_SENSOR ]
+      description: 'Sensor types'
+    MqttTopicType:
+      type: string
+      enum: [POWER, GAS, TEMP, HUMIDITY, SWITCH, STATUS]
+      description: 'Mqtt broker topic types'
+    MqttConfig:
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        clientId:
+          type: number
+          description: 'The unique identification on the mqtt broker'
+        userId:
+          type: number
+          description: 'The user reference for logging into the mqtt broker'
+        url:
+          type: string
+          description: 'The url of the mqtt broker (tcp://localhost:1883)'
+        topics:
+          description: 'The configured topics for the mqtt broker'
+          items:
+            $ref: '#/components/schemas/MqttTopic'
+    MqttTopic:
+      properties:
+        path:
+          type: string
+          description: 'the mqtt topic path e.g. p1/power, p1/gas'
+        type:
+          $ref: '#/components/schemas/MqttTopicType'
+      type: object
+      description: 'The configured topics for the local mqtt broker'
+    Actuator:
+      type: object
+      description: 'An actuator can operate devices'
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              parameter:
+                type: string
+              value:
+                type: number
+    Command:
+      type: object
+      description: 'A command is an event to act on a sensor value or timer'
+      properties:
+        predicateActionList:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              predicate:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    parameter:
+                      type: string
+                      description: 'The parameter that is to be inspected'
+                    value:
+                      type: string
+                      description: 'Relational specification of the parameter value ( using <, >, ==, )'
+              action:
+                type: object
+                properties:
+                  delay:
+                    type: integer
+                    description: 'How many ms should be waited before executing the action'
+                  actionCommand:
+                    type: string
+                    description: 'TODO: Should be put an mqtt command in here?'
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      description: Maakt gebruik van een JWT token
+      name: Authorization
+      in: header

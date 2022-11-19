@@ -1,0 +1,6 @@
+apiPackage: org.lankheet.iot.api
+modelPackage: org.lankheet.iot.model
+dateLibrary: java8-localdatetime
+interfaceOnly: true
+serializableModel: true
+useTags: true

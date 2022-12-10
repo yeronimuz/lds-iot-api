@@ -1,6 +1,11 @@
 apiPackage: org.lankheet.iot.api
+invokerPackage: org.lankheet.iot.invoker
 modelPackage: org.lankheet.iot.model
+configPackage: org.lankheet.iot.config
 dateLibrary: java8-localdatetime
 interfaceOnly: true
 serializableModel: true
+modelTests: false
+useOptional: true
 useTags: true
+returnResponse: false

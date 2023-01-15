@@ -7,12 +7,13 @@ info:
   title: Lankheet Domotics api
   description: Lankheet Domotics API
 servers:
-  - url: /rest/lds-iot-rest/v1
+  - url: /rest/domiot-iot-rest/v1
 security:
-  - apiKeyAuth: [ ]
+  - apiKeyAuth: []
 tags:
   - name: Site
   - name: Device
+  - name: User
 paths:
   /site:
     post:
@@ -194,6 +195,72 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Device'
+  /user:
+    post:
+      tags:
+        - User
+      summary: Add a new User
+      operationId: addUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /user/{userId}:
+    get:
+      tags:
+        - User
+      summary: Get a user
+      operationId: getUser
+      parameters:
+        - name: userId
+          in: path
+          description: user identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - User
+      summary: Update a user
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          description: user identification
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User content
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/User'
 components:
   schemas:
     Id:
@@ -405,6 +472,7 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
+      bearerFormat: jwt
     ApiKeyAuth:
       type: apiKey
       in: header

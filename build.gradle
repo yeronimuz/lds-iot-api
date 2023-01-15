@@ -14,19 +14,20 @@ plugins{
    id 'net.nemerosa.versioning' version '2.8.2'
 }
 
-version '1.0.1-SNAPSHOT'
-
 openApiGenerate{
    generatorName = 'jaxrs-spec'
-   inputSpec = "$rootDir/src/main/resources/openapi.yaml".toString()
-   configFile = "$rootDir/src/main/resources/config.yaml".toString()
-   outputDir = "$buildDir/generated/java".toString()
+   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
+   configFile = "$rootDir/src/main/resources/config.yaml"
+   outputDir = "$buildDir/generated/java"
+   configOptions = [
+      useJakartaEe : "true"
+   ]
 }
 
 task openaApiGenerateTs(type: GenerateTask){
    generatorName = "typescript-angular"
-   inputSpec = "$rootDir/src/main/resources/openapi.yaml".toString()
-   outputDir = "$buildDir/generated/ts".toString()
+   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
+   outputDir = "$buildDir/generated/ts"
    apiPackage = "com.lankheet.lds.api"
 
    configOptions = [
@@ -39,9 +40,9 @@ task openaApiGenerateTs(type: GenerateTask){
 }
 
 task openApiGenerateSql(type: GenerateTask){
-   generatorName = "mysql-schema"
-   inputSpec = "$rootDir/src/main/resources/openapi.yaml".toString()
-   outputDir = "$buildDir/generated/mysql".toString()
+   setProperty('generatorName', "mysql-schema")
+   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
+   outputDir = "$buildDir/generated/mysql"
 }
 
 task copyGenerated(type: Copy){
@@ -49,7 +50,10 @@ task copyGenerated(type: Copy){
    into "${rootDir}/src/main/java"
 }
 
-copyGenerated.dependsOn('openApiGenerate')
+openApiValidate{
+   inputSpec = "${rootDir}/src/main/resources/openapi.yaml"
+}
+
 
 task packageNpmLib{
    doLast{
@@ -62,10 +66,6 @@ task packageNpmLib{
    }
 }
 
-packageNpmLib.dependsOn('openaApiGenerateTs')
-
-compileJava.dependsOn('openApiGenerate')
-
 sourceSets{
    main{
       java{
@@ -74,21 +74,17 @@ sourceSets{
    }
 }
 
-openApiValidate{
-   inputSpec = "${rootDir}/src/main/resources/openapi.yaml".toString()
-}
-
 dependencies{
    compileOnly 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.36'
-   implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.6'
-   implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.6'
+   implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.8'
+   implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.8'
 }
 
 publishing{
    publications{
       maven(MavenPublication){
-         groupId 'com.lankheet.lds'
+         groupId 'com.lankheet.domiot'
          artifactId 'iot-api'
          version version
 
@@ -96,4 +92,13 @@ publishing{
       }
    }
 }
+
+clean {
+   delete 'src/main/java'
+}
+
+tasks.packageNpmLib.dependsOn('openaApiGenerateTs')
+tasks.copyGenerated.dependsOn('openApiGenerate')
+tasks.openApiGenerate.dependsOn('openApiValidate')
+compileJava.dependsOn('openApiGenerate')
 

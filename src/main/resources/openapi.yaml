@@ -78,8 +78,6 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                items:
                   $ref: '#/components/schemas/Site'
   /site/{siteId}/devices:
     get:
@@ -273,13 +271,8 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/Id'
-        permissions:
-          type: string
-          description: 'SITE_ADMIN/NOTIFIED/...'
-        siteId:
-          description: 'A user can belong to only one site'
-          type: integer
-          format: int64
+        role:
+          $ref: '#/components/schemas/Role'
         password:
           type: string
           format: password
@@ -305,6 +298,9 @@ components:
         dtCreated:
           format: date-time
           type: string
+        devices:
+          items:
+            $ref: '#/components/schemas/Device'
         mqttConfig:
           $ref: '#/components/schemas/MqttConfig'
         P1Config:
@@ -314,6 +310,19 @@ components:
         users:
           items:
             $ref: '#/components/schemas/User'
+    Role:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        permissions:
+          items:
+            $ref: '#/components/schemas/Permission'
+    Permission:
+      type: string
+      enum: [ ADMIN, UPDATE, READ ]
+      x-enumNames: [ ADMIN, UPDATE, READ ]
+      description: 'User permission; admin (all), update (read + write), read (no write)'
     PowermeterConfig:
       type: object
       properties:
@@ -355,8 +364,9 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/Id'
-        type:
-          $ref: '#/components/schemas/SensorType'
+        nodes:
+          items:
+            $ref: '#/components/schemas/SensorNode'
         parameters:
           type: object
           additionalProperties:

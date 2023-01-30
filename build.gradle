@@ -14,6 +14,8 @@ plugins{
    id 'net.nemerosa.versioning' version '2.8.2'
 }
 
+version version + '-' + classifier
+
 openApiGenerate{
    generatorName = 'jaxrs-spec'
    inputSpec = "$rootDir/src/main/resources/openapi.yaml"
@@ -54,7 +56,6 @@ openApiValidate{
    inputSpec = "${rootDir}/src/main/resources/openapi.yaml"
 }
 
-
 task packageNpmLib{
    doLast{
       exec{
@@ -84,8 +85,8 @@ dependencies{
 publishing{
    publications{
       maven(MavenPublication){
-         groupId 'com.lankheet.domiot'
-         artifactId 'iot-api'
+         groupId 'org.lankheet.domiot'
+         artifactId 'domiot-rest-api'
          version version
 
          from components.java
@@ -101,4 +102,5 @@ tasks.packageNpmLib.dependsOn('openaApiGenerateTs')
 tasks.copyGenerated.dependsOn('openApiGenerate')
 tasks.openApiGenerate.dependsOn('openApiValidate')
 compileJava.dependsOn('openApiGenerate')
-
+compileJava.dependsOn('copyGenerated')
+publishToMavenLocal.dependsOn(build)

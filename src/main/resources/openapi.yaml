@@ -303,10 +303,6 @@ components:
             $ref: '#/components/schemas/Device'
         mqttConfig:
           $ref: '#/components/schemas/MqttConfig'
-        P1Config:
-          $ref: '#/components/schemas/PowermeterConfig'
-        SerialConfig:
-          $ref: '#/components/schemas/SerialConfig'
         users:
           items:
             $ref: '#/components/schemas/User'
@@ -323,36 +319,35 @@ components:
       enum: [ ADMIN, UPDATE, READ ]
       x-enumNames: [ ADMIN, UPDATE, READ ]
       description: 'User permission; admin (all), update (read + write), read (no write)'
-    PowermeterConfig:
-      type: object
-      properties:
-        repeatValuesAfter:
-          type: integer
-          description: 'After how many seconds will all values be sent instead of only the changed ones'
-        internalQueueSize:
-          type: integer
-          description: 'How many values can be stored internally before values are lost'
-    SerialConfig:
-      type: object
-      properties:
-        p1Key:
-          type: string
-          description: 'unique key of the smart meter'
-        serialPort:
-          type: string
-          description: 'serial port used on the system e.g. /dev/ttyUSB0'
-        baudRate:
-          type: integer
-          description: 'the baudrate of the serial port, 115200'
     Device:
       type: object
       description: 'A device can have multiple sensors and/or actuators'
       properties:
         id:
           $ref: '#/components/schemas/Id'
+        manufacturerId:
+          type: string
+          description: 'identification of the manufacturerId, may be in hex format'
+        modelId:
+          type: string
+          description: 'The model id from the manufacturer'
+        firmwareVersion:
+          type: string
+          description: 'The currently running version of the firmware (major.minor.fix.build)'
+        hardwareVersion:
+          type: string
+          description: 'The hardware version as printed on the PCB or advertised through other info'
         macAddress:
           type: string
-          description: 'The physical address of the device'
+          description: 'The physical address of the device in hex format'
+        mqttConfig:
+          $ref: '#/components/schemas/MqttConfig'
+        parameters:
+          items:
+            $ref: "#/components/schemas/DomiotParameter"
+          example:
+            repeatValuesAfter: 60 # seconds
+            internalQueueSize: 10000 # number of readings that can internally be stored
         sensors:
           items:
             $ref: '#/components/schemas/Sensor'
@@ -364,41 +359,46 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/Id'
-        nodes:
-          items:
-            $ref: '#/components/schemas/SensorNode'
+        type:
+            $ref: '#/components/schemas/SensorType'
         parameters:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/IotParameter"
-    IotParameter:
+          items:
+            $ref: "#/components/schemas/DomiotParameter"
+    DomiotParameter:
       type: object
       properties:
-        parameter:
+        name:
           type: string
+        parameterType:
+          type: string
+          enum: [ String, Number, Boolean]
         value:
-          type: number
+          type: object
     SensorType:
       type: string
-      enum: [ TEMP, HUMID, POWER, GAS_METER, GAS_SENSOR ]
-      x-enumNames: [ TEMPERATURE, HUMIDITY, POWER_METER, GAS_METER, GAS_SENSOR ]
-      description: 'Sensor types'
-    SensorNode:
-      type: object
-      description: 'A sensor node is a logical unit that can produce a measurement in the mqtt datalink layer. 
-      It is derived from the Sensor type. Sensors can produce more types of sensor values. '
-      properties:
-        macAddress:
-          type: string
-          description: 'The unique identification of the sensor.'
-        type:
-          $ref: '#/components/schemas/SensorType'
+      enum:
+      - NOT_USED   # 0
+      - POWER_PT1  # 1
+      - POWER_PT2  # 2
+      - POWER_CT1  # 3
+      - POWER_CT2  # 4
+      - POWER_AC   # 5
+      - POWER_AP   # 6
+      - GAS_METER  # 7
+      - TEMP       # 8
+      - HUMID      # 9
+      - WATER      # 10
+      - GAS_SENSOR # 11
+      - HYDRO      # 12
+      - STATUS     # 13
+      - LEVEL      # 14
+      description: 'Sensor types; the first entry is for making the first one start with ordinal 1'
     SensorValue:
       description: 'A sensor value correspondents to a measurement taken by a sensor'
       type: object
       properties:
-        node:
-          $ref: '#/components/schemas/SensorNode'
+        sensor:
+          $ref: '#/components/schemas/Sensor'
         timestamp:
           description: 'date-time of occurrence'
           type: string
@@ -408,7 +408,7 @@ components:
           format: double
     MqttTopicType:
       type: string
-      enum: [ POWER, GAS, TEMP, HUMIDITY, SWITCH, STATUS ]
+      enum: [ POWER, GAS, TEMP, WATER, HUMIDITY, SWITCH, LEVEL, STATUS ]
       description: 'Mqtt broker topic types'
     MqttConfig:
       properties:
@@ -427,6 +427,7 @@ components:
           description: 'The configured topics for the mqtt broker'
           items:
             $ref: '#/components/schemas/MqttTopic'
+      description: 'Operational parameters for connecting to the MQTT broker'
     MqttTopic:
       properties:
         path:
@@ -438,14 +439,13 @@ components:
       description: 'The configured topics for the local mqtt broker'
     Actuator:
       type: object
-      description: 'An actuator can operate devices'
+      description: 'An actuator can operate devices. The P1 smart meter is an example of such a device'
       properties:
         id:
           $ref: '#/components/schemas/Id'
         parameters:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/IotParameter"
+          items:
+            $ref: "#/components/schemas/DomiotParameter"
     Command:
       type: object
       description: 'A command is an event to act on a sensor value or timer'

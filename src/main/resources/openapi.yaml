@@ -364,6 +364,8 @@ components:
         parameters:
           items:
             $ref: "#/components/schemas/DomiotParameter"
+        mqttTopic:
+          $ref: '#/components/schemas/MqttTopic'
     DomiotParameter:
       type: object
       properties:
@@ -377,21 +379,22 @@ components:
     SensorType:
       type: string
       enum:
-      - NOT_USED   # 0
-      - POWER_PT1  # 1
-      - POWER_PT2  # 2
-      - POWER_CT1  # 3
-      - POWER_CT2  # 4
-      - POWER_AC   # 5
-      - POWER_AP   # 6
-      - GAS_METER  # 7
-      - TEMP       # 8
-      - HUMID      # 9
-      - WATER      # 10
-      - GAS_SENSOR # 11
-      - HYDRO      # 12
-      - STATUS     # 13
-      - LEVEL      # 14
+      - NOT_USED        # 0
+      - POWER_PT1       # 1
+      - POWER_PT2       # 2
+      - POWER_CT1       # 3
+      - POWER_CT2       # 4
+      - POWER_AC        # 5
+      - POWER_AP        # 6
+      - GAS_METER       # 7
+      - TEMP            # 8
+      - HUMID           # 9
+      - WATER           # 10
+      - GAS_SENSOR      # 11
+      - HYDRO           # 12
+      - STATUS          # 13
+      - VOLTAGE_LEVEL   # 14
+      - CURRENT_LEVEL   # 15
       description: 'Sensor types; the first entry is for making the first one start with ordinal 1'
     SensorValue:
       description: 'A sensor value correspondents to a measurement taken by a sensor'
@@ -406,10 +409,6 @@ components:
         value:
           type: number
           format: double
-    MqttTopicType:
-      type: string
-      enum: [ POWER, GAS, TEMP, WATER, HUMIDITY, SWITCH, LEVEL, STATUS ]
-      description: 'Mqtt broker topic types'
     MqttConfig:
       properties:
         id:
@@ -432,9 +431,7 @@ components:
       properties:
         path:
           type: string
-          description: 'the mqtt topic path e.g. p1/power, p1/gas'
-        type:
-          $ref: '#/components/schemas/MqttTopicType'
+          description: 'the mqtt topic path e.g. home1/0/fusebox/p1/pact1'
       type: object
       description: 'The configured topics for the local mqtt broker'
     Actuator:
@@ -446,6 +443,8 @@ components:
         parameters:
           items:
             $ref: "#/components/schemas/DomiotParameter"
+        mqttTopic:
+          $ref: '#/components/schemas/MqttTopic'
     Command:
       type: object
       description: 'A command is an event to act on a sensor value or timer'

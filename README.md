@@ -57,3 +57,8 @@ Once the powermeter device is operational, the measured values are automatically
 So what must be configured in the database before anything can start is returning a default mqtt_configuration with the mqtt broker details.
 The device may have to be updated in the database with the clientId
 The serial port configuration may be very specific to the local configuration. It is therefore better to load the serial configuration from file. 
+
+# MQTT topics
+The Domiot topics are organized as follows:
+#siteId/floor/room/device/sensor|actutor/sensor|actuatorId
+* A sensor that publishes measured values shall use topics it gets returned from the registration

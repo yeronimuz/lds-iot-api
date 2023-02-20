@@ -14,8 +14,6 @@ plugins{
    id 'net.nemerosa.versioning' version '2.8.2'
 }
 
-version version + '-' + classifier
-
 openApiGenerate{
    generatorName = 'jaxrs-spec'
    inputSpec = "$rootDir/src/main/resources/openapi.yaml"
@@ -45,6 +43,17 @@ task openApiGenerateSql(type: GenerateTask){
    setProperty('generatorName', "mysql-schema")
    inputSpec = "$rootDir/src/main/resources/openapi.yaml"
    outputDir = "$buildDir/generated/mysql"
+}
+
+task openApiGenerateClients(type: GenerateTask) {
+   generatorName = 'java'
+   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
+   configFile = "$rootDir/src/main/resources/config.yaml"
+   outputDir = "$buildDir/generated/java/client"
+   configOptions = [
+           useJakartaEe : "true",
+           artifactId   : "domiot-java-client"
+   ]
 }
 
 task copyGenerated(type: Copy){
@@ -85,9 +94,9 @@ dependencies{
 publishing{
    publications{
       maven(MavenPublication){
-         groupId 'org.lankheet.domiot'
-         artifactId 'domiot-rest-api'
-         version version
+         groupId findProperty('group')
+         artifactId findProperty('name')
+         version findProperty('version') + '-' + findProperty('classifier')
 
          from components.java
       }
@@ -102,5 +111,6 @@ tasks.packageNpmLib.dependsOn('openaApiGenerateTs')
 tasks.copyGenerated.dependsOn('openApiGenerate')
 tasks.openApiGenerate.dependsOn('openApiValidate')
 compileJava.dependsOn('openApiGenerate')
+compileJava.dependsOn('openApiGenerateClients')
 compileJava.dependsOn('copyGenerated')
 publishToMavenLocal.dependsOn(build)

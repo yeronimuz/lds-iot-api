@@ -342,6 +342,8 @@ components:
           description: 'The physical address of the device in hex format'
         mqttConfig:
           $ref: '#/components/schemas/MqttConfig'
+        serialConfig:
+          $ref: '#/components/schemas/SerialConfig'
         parameters:
           items:
             $ref: "#/components/schemas/DomiotParameter"
@@ -354,6 +356,29 @@ components:
         actuators:
           items:
             $ref: '#/components/schemas/Actuator'
+    SerialConfig:
+      type: object
+      description: 'The serial port configuration'
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        serialPort:
+          type: string
+        baudRate:
+          type: integer
+        parity:
+          enum:
+            - ODD
+            - EVEN
+        databits:
+          type: integer
+          minimum: 7
+          maximum: 8
+          default: 8
+        flowControl:
+          enum:
+            - XON_XOFF  // SW flow control
+            - RTS_CTS   // HW flow control
     Sensor:
       type: object
       properties:

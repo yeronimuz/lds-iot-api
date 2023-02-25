@@ -24,56 +24,14 @@ openApiGenerate{
    ]
 }
 
-task openaApiGenerateTs(type: GenerateTask){
-   generatorName = "typescript-angular"
-   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
-   outputDir = "$buildDir/generated/ts"
-   apiPackage = "com.lankheet.lds.api"
-
-   configOptions = [
-      ngVersion : "14.2.11",
-      npmName   : "${project.name}-client",
-      npmVersion: "${project.version}",
-      modelTests: "false",
-      //      npmRepository: project.NEXUS_UPLOAD_URL
-   ]
-}
-
-task openApiGenerateSql(type: GenerateTask){
-   setProperty('generatorName', "mysql-schema")
-   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
-   outputDir = "$buildDir/generated/mysql"
-}
-
-task openApiGenerateClients(type: GenerateTask) {
-   generatorName = 'java'
-   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
-   configFile = "$rootDir/src/main/resources/config.yaml"
-   outputDir = "$buildDir/generated/java/client"
-   configOptions = [
-           useJakartaEe : "true",
-           artifactId   : "domiot-java-client"
-   ]
-}
-
-task copyGenerated(type: Copy){
+tasks.register('copyGenerated', Copy) {
    from "${rootDir}/build/generated/java/src/gen/java"
    into "${rootDir}/src/main/java"
 }
 
+
 openApiValidate{
    inputSpec = "${rootDir}/src/main/resources/openapi.yaml"
-}
-
-task packageNpmLib{
-   doLast{
-      exec{
-         workingDir "${buildDir}/generated/ts"
-         executable 'npx'
-         args 'ng', 'build', "${project.name}-client"
-      }
-      println "Executed!"
-   }
 }
 
 sourceSets{
@@ -86,6 +44,7 @@ sourceSets{
 
 dependencies{
    compileOnly 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
+   implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0'
    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.36'
    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.8'
    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.8'
@@ -107,10 +66,7 @@ clean {
    delete 'src/main/java'
 }
 
-tasks.packageNpmLib.dependsOn('openaApiGenerateTs')
 tasks.copyGenerated.dependsOn('openApiGenerate')
 tasks.openApiGenerate.dependsOn('openApiValidate')
-compileJava.dependsOn('openApiGenerate')
-compileJava.dependsOn('openApiGenerateClients')
 compileJava.dependsOn('copyGenerated')
 publishToMavenLocal.dependsOn(build)

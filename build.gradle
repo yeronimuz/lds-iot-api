@@ -1,72 +1,82 @@
-import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-
-buildscript{
-   repositories{
-      mavenLocal()
-      maven{url "https://repo1.maven.org/maven2"}
-   }
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
 }
 
-plugins{
-   id 'org.openapi.generator' version '6.2.1'
-   id 'maven-publish'
-   id 'java-gradle-plugin'
-   id 'net.nemerosa.versioning' version '2.8.2'
+plugins {
+    id 'org.openapi.generator' version '6.6.0'
+    id 'maven-publish'
+    id 'java-gradle-plugin'
+    id 'net.nemerosa.versioning' version '2.8.2'
 }
 
-openApiGenerate{
-   generatorName = 'jaxrs-spec'
-   inputSpec = "$rootDir/src/main/resources/openapi.yaml"
-   configFile = "$rootDir/src/main/resources/config.yaml"
-   outputDir = "$buildDir/generated/java"
-   configOptions = [
-      useJakartaEe : "true"
-   ]
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
 
-tasks.register('copyGenerated', Copy) {
-   from "${rootDir}/build/generated/java/src/gen/java"
-   into "${rootDir}/src/main/java"
+dependencies {
+    compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0'
+    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.46'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.8'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.8'
 }
 
-
-openApiValidate{
-   inputSpec = "${rootDir}/src/main/resources/openapi.yaml"
+openApiValidate {
+    inputSpec = "${rootDir}/src/main/resources/openapi.yaml"
 }
 
-sourceSets{
-   main{
-      java{
-         srcDir "$buildDir/generated/src/main/java"
-      }
-   }
+openApiGenerate {
+    generatorName = 'jaxrs-spec'
+    inputSpec = "$rootDir/src/main/resources/openapi.yaml"
+    configFile = "$rootDir/src/main/resources/config.yaml"
+    outputDir = "$rootDir/"
+    configOptions = [
+            "useJakartaEe": "true"
+    ]
 }
 
-dependencies{
-   compileOnly 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
-   implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0'
-   implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.36'
-   implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.8'
-   implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.8'
-}
+//tasks.register('copyGenerated', Copy)  {
+//   dependsOn('openApiGenerate')
+//   from "${rootDir}/build/generated/java/src/gen/java"
+//   into "${rootDir}/src/main/java"
+//}
 
-publishing{
-   publications{
-      maven(MavenPublication){
-         groupId findProperty('group')
-         artifactId findProperty('name')
-         version findProperty('version') + '-' + findProperty('classifier')
-
-         from components.java
-      }
-   }
+sourceSets {
+    main {
+        java {
+            srcDir "$rootDir/src/gen/java"
+        }
+    }
 }
 
 clean {
-   delete 'src/main/java'
+   delete "$rootDir/src/gen/"
 }
 
-tasks.copyGenerated.dependsOn('openApiGenerate')
-tasks.openApiGenerate.dependsOn('openApiValidate')
-compileJava.dependsOn('copyGenerated')
-publishToMavenLocal.dependsOn(build)
+tasks.register('fixJavaxJakarta') {
+    doLast {
+        ant.replaceregexp(match: 'import javax', replace: 'import jakarta', flags: 'g', byline: true) {
+            fileset(dir: "$rootDir/src/gen/java/org/lankheet/domiot/api", includes: "*.java")
+        }
+    }
+}
+
+tasks.fixJavaxJakarta.dependsOn('openApiGenerate')
+tasks.compileJava.dependsOn('fixJavaxJakarta')
+tasks.publishToMavenLocal.dependsOn('compileJava')
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId findProperty('group')
+            artifactId findProperty('name')
+            version findProperty('version') + '-' + findProperty('classifier')
+
+            from components.java
+        }
+    }
+}

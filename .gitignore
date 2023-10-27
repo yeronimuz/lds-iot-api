@@ -5,3 +5,9 @@
 build
 /.idea/
 /src/main/java
+/.openapi-generator-ignore
+/pom.xml
+/src/gen/
+/src/main/openapi/openapi.yaml
+/.openapi-generator/FILES
+/.openapi-generator/VERSION

@@ -386,6 +386,10 @@ components:
           $ref: '#/components/schemas/Id'
         type:
             $ref: '#/components/schemas/SensorType'
+        name:
+          type: string
+        description:
+          type: string
         parameters:
           items:
             $ref: "#/components/schemas/DomiotParameter"
@@ -394,6 +398,8 @@ components:
     DomiotParameter:
       type: object
       properties:
+        id:
+          $ref: '#/components/schemas/Id'
         name:
           type: string
         parameterType:
@@ -454,6 +460,8 @@ components:
       description: 'Operational parameters for connecting to the MQTT broker'
     MqttTopic:
       properties:
+        id:
+          $ref: '#/components/schemas/Id'
         path:
           type: string
           description: 'the mqtt topic path e.g. home1/0/fusebox/p1/pact1'
@@ -465,6 +473,10 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        description:
+          type: string
         parameters:
           items:
             $ref: "#/components/schemas/DomiotParameter"
@@ -474,6 +486,8 @@ components:
       type: object
       description: 'A command is an event to act on a sensor value or timer'
       properties:
+        id:
+          $ref: '#/components/schemas/Id'
         predicateActionList:
           type: object
           additionalProperties:
@@ -493,12 +507,14 @@ components:
               action:
                 type: object
                 properties:
+                  id:
+                    $ref: '#/components/schemas/Id'
                   delay:
                     type: integer
                     description: 'How many ms should be waited before executing the action'
                   actionCommand:
                     type: string
-                    description: 'TODO: Should be put an mqtt command in here?'
+                    description: 'TODO: Should we put an mqtt command in here?'
   securitySchemes:
     BasicAuth:
       type: http

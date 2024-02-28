@@ -259,6 +259,45 @@ paths:
                 type: object
                 items:
                   $ref: '#/components/schemas/User'
+  /sensor-values:
+    get:
+      summary: Get sensor values
+      tags:
+        - SensorValue
+      operationId: getSensorValues
+      parameters:
+        - name: sensorId
+          in: query
+          schema:
+            type: integer
+          required: true
+          description: Id of the sensor
+        - name: start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          required: true
+          description: Start time of the requested period of Sensor Values
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          required: true
+          allowEmptyValue: true
+          description: End time of the requested period of Sensor Values
+      responses:
+        '200':
+          description: Sensor values retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SensorValue'
+        204:
+          description: No sensor values were found
 components:
   schemas:
     Id:
@@ -407,6 +446,9 @@ components:
           enum: [ String, Number, Boolean]
         value:
           type: object
+        readonly:
+          type: boolean
+          default: false
     SensorType:
       type: string
       enum:

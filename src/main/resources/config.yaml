@@ -6,6 +6,4 @@ dateLibrary: java8-localdatetime
 interfaceOnly: true
 serializableModel: true
 modelTests: false
-useOptional: true
 useTags: true
-returnResponse: false

@@ -19,11 +19,11 @@ repositories {
 
 dependencies {
     compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0'
-    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.46'
-    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.8'
-    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.8'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.1.3'
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.12.0'
+    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.52'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.20'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.20'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.2.3'
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
 }
 
@@ -32,8 +32,7 @@ openApiValidate {
 }
 
 openApiGenerate {
-    generatorName = 'spring'
-    library = 'spring-boot'
+    generatorName = 'jaxrs-spec'
     inputSpec = "$rootDir/src/main/resources/openapi.yaml"
     configFile = "$rootDir/src/main/resources/config.yaml"
     outputDir = "$rootDir/"
@@ -62,7 +61,7 @@ clean {
 tasks.register('fixJavaxJakarta') {
     doLast {
         ant.replaceregexp(match: 'import javax', replace: 'import jakarta', flags: 'g', byline: true) {
-            fileset(dir: "$rootDir/src/main/java/org/lankheet/domiot/api", includes: "*.java")
+            fileset(dir: "$rootDir/src/gen/java/org/lankheet/domiot/api", includes: "*.java")
         }
     }
 }

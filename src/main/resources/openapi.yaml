@@ -1,25 +1,19 @@
-# TODO: Enumerate user permissions (or make dynamic)
-# TODO: Create a separate openapi project for the database model (separate DTO from database model)
-# TODO: Security measures for user.password
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
-  version: 1.0.1
-  title: Lankheet Domotics api
   description: Lankheet Domotics API
+  title: Lankheet Domotics api
+  version: 1.0.1
 servers:
-  - url: /rest/domiot-iot-rest/v1
+- url: /rest/domiot-iot-rest/v1
 security:
-  - apiKeyAuth: []
+- apiKeyAuth: []
 tags:
-  - name: Site
-  - name: Device
-  - name: User
+- name: Site
+- name: Device
+- name: User
 paths:
   /site:
     post:
-      tags:
-        - Site
-      summary: Add a new site
       operationId: addSite
       requestBody:
         content:
@@ -27,177 +21,218 @@ paths:
             schema:
               $ref: '#/components/schemas/Site'
       responses:
-        '200':
-          description: Site saved
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Site'
+          description: Site saved
+      summary: Add a new site
+      tags:
+      - Site
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Site
   /site/{siteId}:
     get:
-      tags:
-        - Site
-      summary: Get a site
       operationId: getSite
       parameters:
-        - name: siteId
-          in: path
-          description: site identification
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - description: site identification
+        explode: false
+        in: path
+        name: siteId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
       responses:
-        '200':
-          description: Site content
+        "200":
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/Site'
-    put:
+                $ref: '#/components/schemas/Site'
+          description: Site content
+      summary: Get a site
       tags:
-        - Site
-      summary: Update a site
+      - Site
+      x-accepts: application/json
+      x-tags:
+      - tag: Site
+    put:
       operationId: updateSite
       parameters:
-        - name: siteId
-          in: path
-          description: site identification
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - description: site identification
+        explode: false
+        in: path
+        name: siteId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Site'
       responses:
-        '200':
-          description: Site
+        "200":
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/Site'
+                $ref: '#/components/schemas/Site'
+          description: Site
+      summary: Update a site
+      tags:
+      - Site
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Site
   /site/{siteId}/devices:
     get:
-      tags:
-        - Device
-      summary: Get all devices of a site
       operationId: getSiteDevices
       parameters:
-        - name: siteId
-          in: path
-          description: site identification
-          required: true
-          schema:
-            type: number
+      - description: site identification
+        explode: false
+        in: path
+        name: siteId
+        required: true
+        schema:
+          type: number
+        style: simple
       responses:
-        '200':
-          description: Devices
+        "200":
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/Device'
-    post:
+                type: array
+          description: Devices
+      summary: Get all devices of a site
       tags:
-        - Device
-      summary: Add devices to a site
+      - Device
+      x-accepts: application/json
+      x-tags:
+      - tag: Device
+    post:
       operationId: addDevices
       parameters:
-        - name: siteId
-          in: path
-          description: site identification
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - description: site identification
+        explode: false
+        in: path
+        name: siteId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
       requestBody:
         content:
           application/json:
             schema:
-              type: array
               items:
                 $ref: '#/components/schemas/Device'
+              type: array
       responses:
-        '200':
-          description: Device is updated
+        "200":
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/Device'
+                type: array
+          description: Device is updated
+      summary: Add devices to a site
+      tags:
+      - Device
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Device
   /site/{siteId}/devices/{deviceId}:
     get:
-      tags:
-        - Device
-      summary: Get a device
       operationId: getDevice
       parameters:
-        - name: siteId
-          in: path
-          description: site identification
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: deviceId
-          in: path
-          description: The device identification
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - description: site identification
+        explode: false
+        in: path
+        name: siteId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: The device identification
+        explode: false
+        in: path
+        name: deviceId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
       responses:
-        '200':
-          description: Device content
+        "200":
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/Device'
-    put:
+                type: array
+          description: Device content
+      summary: Get a device
       tags:
-        - Device
-      summary: Update a device configuration
+      - Device
+      x-accepts: application/json
+      x-tags:
+      - tag: Device
+    put:
       operationId: updateDevice
       parameters:
-        - name: siteId
-          in: path
-          description: site identification
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: deviceId
-          in: path
-          description: The device identification
-          required: true
-          schema:
-            type: object
+      - description: site identification
+        explode: false
+        in: path
+        name: siteId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: The device identification
+        explode: false
+        in: path
+        name: deviceId
+        required: true
+        schema:
+          type: object
+        style: simple
       requestBody:
         content:
-         application/json:
+          application/json:
             schema:
               $ref: '#/components/schemas/Device'
       responses:
-        '200':
-          description: Device is updated
+        "200":
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/Device'
+                type: array
+          description: Device is updated
+      summary: Update a device configuration
+      tags:
+      - Device
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Device
   /user:
     post:
-      tags:
-        - User
-      summary: Add a new User
       operationId: addUser
       requestBody:
         content:
@@ -205,131 +240,436 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        '200':
-          description: User saved
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+          description: User saved
+      summary: Add a new User
+      tags:
+      - User
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: User
   /user/{userId}:
     get:
-      tags:
-        - User
-      summary: Get a user
       operationId: getUser
       parameters:
-        - name: userId
-          in: path
-          description: user identification
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - description: user identification
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
       responses:
-        '200':
-          description: User content
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-    put:
+          description: User content
+      summary: Get a user
       tags:
-        - User
-      summary: Update a user
+      - User
+      x-accepts: application/json
+      x-tags:
+      - tag: User
+    put:
       operationId: updateUser
       parameters:
-        - name: userId
-          in: path
-          description: user identification
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - description: user identification
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        '200':
-          description: User content
+        "200":
           content:
             application/json:
               schema:
-                type: object
                 items:
                   $ref: '#/components/schemas/User'
+                type: array
+          description: User content
+      summary: Update a user
+      tags:
+      - User
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: User
   /sensor-values:
     get:
-      summary: Get sensor values
-      tags:
-        - SensorValue
       operationId: getSensorValues
       parameters:
-        - name: sensorId
-          in: query
-          schema:
-            type: integer
-          required: true
-          description: Id of the sensor
-        - name: start
-          in: query
-          schema:
-            type: string
-            format: date-time
-          required: true
-          description: Start time of the requested period of Sensor Values
-        - name: end
-          in: query
-          schema:
-            type: string
-            format: date-time
-          required: true
-          allowEmptyValue: true
-          description: End time of the requested period of Sensor Values
+      - $ref: '#/components/parameters/PaginationOffsetParam'
+      - $ref: '#/components/parameters/PaginationLimitParam'
+      - description: Id of the sensor
+        explode: true
+        in: query
+        name: sensorId
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: Start time of the requested period of Sensor Values
+        explode: true
+        in: query
+        name: start
+        required: true
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - allowEmptyValue: true
+        description: End time of the requested period of Sensor Values
+        explode: true
+        in: query
+        name: end
+        required: true
+        schema:
+          format: date-time
+          type: string
+        style: form
       responses:
-        '200':
-          description: Sensor values retrieved
+        "200":
           content:
             application/json:
               schema:
-                type: array
                 items:
-                  $ref: '#/components/schemas/SensorValue'
-        204:
+                  $ref: '#/components/schemas/SensorValueListResponse'
+                type: array
+          description: Sensor values retrieved
+        "204":
           description: No sensor values were found
+      summary: Get sensor values
+      tags:
+      - SensorValue
+      x-accepts: application/json
+      x-tags:
+      - tag: SensorValue
 components:
+  parameters:
+    PaginationOffsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: The number of items to skip before starting to collect the result set.
+      example: 0
+    PaginationLimitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 200
+      description: The maximum number of items to return, the maximum numbers of items to return is set to 200.
+      example: 20
   schemas:
     Id:
-      type: integer
+      description: unique identification
       format: int64
       readOnly: true
-      description: 'unique identification'
+      type: integer
     User:
-      description: 'A user of the site'
+      description: A user of the site
+      example:
+        dtRegistered: 2000-01-23T04:56:07.000+00:00
+        password: password
+        role:
+          permissions:
+          - null
+          - null
+          id: 1
+        email-address: email-address
+        id: 1
+        status: ACTIVE
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         role:
           $ref: '#/components/schemas/Role'
         password:
-          type: string
           format: password
+          type: string
         email-address:
           type: string
         dtRegistered:
-          type: string
           format: date-time
-        status:
           type: string
-          enum: [ ACTIVE, LOCKED, REGISTERED ]
-          x-enumNames: [ ACTIVE, LOCKED, REGISTERED ]
-          description: 'User status; active, locked (for security reasons), registered (not active)'
+        status:
+          description: "User status; active, locked (for security reasons), registered\
+            \ (not active)"
+          enum:
+          - ACTIVE
+          - LOCKED
+          - REGISTERED
+          type: string
+          x-enumNames:
+          - ACTIVE
+          - LOCKED
+          - REGISTERED
     Site:
-      type: object
+      example:
+        dtCreated: 2000-01-23T04:56:07.000+00:00
+        devices:
+        - macAddress: macAddress
+          serialConfig:
+            baudRate: 9
+            parity: ODD
+            databits: 7
+            serialPort: serialPort
+            id: 7
+            flowControl: XON_XOFF  // SW flow control
+          sensors:
+          - name: name
+            description: description
+            id: 2
+            mqttTopic:
+              path: path
+              id: 2
+            type: null
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          - name: name
+            description: description
+            id: 2
+            mqttTopic:
+              path: path
+              id: 2
+            type: null
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          actuators:
+          - name: name
+            description: description
+            id: 7
+            mqttTopic:
+              path: path
+              id: 2
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          - name: name
+            description: description
+            id: 7
+            mqttTopic:
+              path: path
+              id: 2
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          modelId: modelId
+          manufacturerId: manufacturerId
+          hardwareVersion: hardwareVersion
+          id: 6
+          firmwareVersion: firmwareVersion
+          parameters:
+            repeatValuesAfter: 60
+            internalQueueSize: 10000
+          mqttConfig:
+            clientId: 5.962133916683182
+            topics:
+            - path: path
+              id: 2
+            - path: path
+              id: 2
+            id: 1
+            userId: 5.637376656633329
+            url: url
+        - macAddress: macAddress
+          serialConfig:
+            baudRate: 9
+            parity: ODD
+            databits: 7
+            serialPort: serialPort
+            id: 7
+            flowControl: XON_XOFF  // SW flow control
+          sensors:
+          - name: name
+            description: description
+            id: 2
+            mqttTopic:
+              path: path
+              id: 2
+            type: null
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          - name: name
+            description: description
+            id: 2
+            mqttTopic:
+              path: path
+              id: 2
+            type: null
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          actuators:
+          - name: name
+            description: description
+            id: 7
+            mqttTopic:
+              path: path
+              id: 2
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          - name: name
+            description: description
+            id: 7
+            mqttTopic:
+              path: path
+              id: 2
+            parameters:
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+            - parameterType: String
+              readonly: false
+              name: name
+              id: 4
+              value: "{}"
+          modelId: modelId
+          manufacturerId: manufacturerId
+          hardwareVersion: hardwareVersion
+          id: 6
+          firmwareVersion: firmwareVersion
+          parameters:
+            repeatValuesAfter: 60
+            internalQueueSize: 10000
+          mqttConfig:
+            clientId: 5.962133916683182
+            topics:
+            - path: path
+              id: 2
+            - path: path
+              id: 2
+            id: 1
+            userId: 5.637376656633329
+            url: url
+        name: name
+        siteId: 0
+        description: description
+        users:
+        - dtRegistered: 2000-01-23T04:56:07.000+00:00
+          password: password
+          role:
+            permissions:
+            - null
+            - null
+            id: 1
+          email-address: email-address
+          id: 1
+          status: ACTIVE
+        - dtRegistered: 2000-01-23T04:56:07.000+00:00
+          password: password
+          role:
+            permissions:
+            - null
+            - null
+            id: 1
+          email-address: email-address
+          id: 1
+          status: ACTIVE
+        mqttConfig:
+          clientId: 5.962133916683182
+          topics:
+          - path: path
+            id: 2
+          - path: path
+            id: 2
+          id: 1
+          userId: 5.637376656633329
+          url: url
       properties:
         siteId:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         name:
           type: string
         description:
@@ -340,232 +680,513 @@ components:
         devices:
           items:
             $ref: '#/components/schemas/Device'
+          type: array
         mqttConfig:
           $ref: '#/components/schemas/MqttConfig'
         users:
           items:
             $ref: '#/components/schemas/User'
-    Role:
+          type: array
       type: object
+    Role:
+      example:
+        permissions:
+        - null
+        - null
+        id: 1
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         permissions:
           items:
             $ref: '#/components/schemas/Permission'
-    Permission:
-      type: string
-      enum: [ ADMIN, UPDATE, READ ]
-      x-enumNames: [ ADMIN, UPDATE, READ ]
-      description: 'User permission; admin (all), update (read + write), read (no write)'
-    Device:
+          type: array
       type: object
-      description: 'A device can have multiple sensors and/or actuators'
+    Permission:
+      description: "User permission; admin (all), update (read + write), read (no\
+        \ write)"
+      enum:
+      - ADMIN
+      - UPDATE
+      - READ
+      type: string
+      x-enumNames:
+      - ADMIN
+      - UPDATE
+      - READ
+    Device:
+      description: A device can have multiple sensors and/or actuators
+      example:
+        macAddress: macAddress
+        serialConfig:
+          baudRate: 9
+          parity: ODD
+          databits: 7
+          serialPort: serialPort
+          id: 7
+          flowControl: XON_XOFF  // SW flow control
+        sensors:
+        - name: name
+          description: description
+          id: 2
+          mqttTopic:
+            path: path
+            id: 2
+          type: null
+          parameters:
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+        - name: name
+          description: description
+          id: 2
+          mqttTopic:
+            path: path
+            id: 2
+          type: null
+          parameters:
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+        actuators:
+        - name: name
+          description: description
+          id: 7
+          mqttTopic:
+            path: path
+            id: 2
+          parameters:
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+        - name: name
+          description: description
+          id: 7
+          mqttTopic:
+            path: path
+            id: 2
+          parameters:
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+        modelId: modelId
+        manufacturerId: manufacturerId
+        hardwareVersion: hardwareVersion
+        id: 6
+        firmwareVersion: firmwareVersion
+        parameters:
+          repeatValuesAfter: 60
+          internalQueueSize: 10000
+        mqttConfig:
+          clientId: 5.962133916683182
+          topics:
+          - path: path
+            id: 2
+          - path: path
+            id: 2
+          id: 1
+          userId: 5.637376656633329
+          url: url
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         manufacturerId:
+          description: "identification of the manufacturerId, may be in hex format"
           type: string
-          description: 'identification of the manufacturerId, may be in hex format'
         modelId:
+          description: The model id from the manufacturer
           type: string
-          description: 'The model id from the manufacturer'
         firmwareVersion:
+          description: The currently running version of the firmware (major.minor.fix.build)
           type: string
-          description: 'The currently running version of the firmware (major.minor.fix.build)'
         hardwareVersion:
+          description: The hardware version as printed on the PCB or advertised through
+            other info
           type: string
-          description: 'The hardware version as printed on the PCB or advertised through other info'
         macAddress:
+          description: The physical address of the device in hex format
           type: string
-          description: 'The physical address of the device in hex format'
         mqttConfig:
           $ref: '#/components/schemas/MqttConfig'
         serialConfig:
           $ref: '#/components/schemas/SerialConfig'
         parameters:
-          items:
-            $ref: "#/components/schemas/DomiotParameter"
           example:
-            repeatValuesAfter: 60 # seconds
-            internalQueueSize: 10000 # number of readings that can internally be stored
+            repeatValuesAfter: 60
+            internalQueueSize: 10000
+          items:
+            $ref: '#/components/schemas/DomiotParameter'
+          type: array
         sensors:
           items:
             $ref: '#/components/schemas/Sensor'
+          type: array
         actuators:
           items:
             $ref: '#/components/schemas/Actuator'
-    SerialConfig:
+          type: array
       type: object
-      description: 'The serial port configuration'
+    SerialConfig:
+      description: The serial port configuration
+      example:
+        baudRate: 9
+        parity: ODD
+        databits: 7
+        serialPort: serialPort
+        id: 7
+        flowControl: XON_XOFF  // SW flow control
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         serialPort:
           type: string
         baudRate:
           type: integer
         parity:
           enum:
-            - ODD
-            - EVEN
+          - ODD
+          - EVEN
+          type: string
         databits:
-          type: integer
-          minimum: 7
-          maximum: 8
           default: 8
+          maximum: 8
+          minimum: 7
+          type: integer
         flowControl:
           enum:
-            - XON_XOFF  // SW flow control
-            - RTS_CTS   // HW flow control
-    Sensor:
+          - XON_XOFF  // SW flow control
+          - RTS_CTS   // HW flow control
+          type: string
       type: object
+    Sensor:
+      example:
+        name: name
+        description: description
+        id: 2
+        mqttTopic:
+          path: path
+          id: 2
+        type: null
+        parameters:
+        - parameterType: String
+          readonly: false
+          name: name
+          id: 4
+          value: "{}"
+        - parameterType: String
+          readonly: false
+          name: name
+          id: 4
+          value: "{}"
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         type:
-            $ref: '#/components/schemas/SensorType'
+          $ref: '#/components/schemas/SensorType'
         name:
           type: string
         description:
           type: string
         parameters:
           items:
-            $ref: "#/components/schemas/DomiotParameter"
+            $ref: '#/components/schemas/DomiotParameter'
+          type: array
         mqttTopic:
           $ref: '#/components/schemas/MqttTopic'
-    DomiotParameter:
       type: object
+    DomiotParameter:
+      example:
+        parameterType: String
+        readonly: false
+        name: name
+        id: 4
+        value: "{}"
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         name:
           type: string
         parameterType:
+          enum:
+          - String
+          - Number
+          - Boolean
           type: string
-          enum: [ String, Number, Boolean]
         value:
           type: object
         readonly:
-          type: boolean
           default: false
-    SensorType:
-      type: string
-      enum:
-      - NOT_USED        # 0
-      - POWER_PT1       # 1
-      - POWER_PT2       # 2
-      - POWER_CT1       # 3
-      - POWER_CT2       # 4
-      - POWER_AC        # 5
-      - POWER_AP        # 6
-      - GAS_METER       # 7
-      - TEMP            # 8
-      - HUMID           # 9
-      - WATER           # 10
-      - GAS_SENSOR      # 11
-      - HYDRO           # 12
-      - STATUS          # 13
-      - VOLTAGE_LEVEL   # 14
-      - CURRENT_LEVEL   # 15
-      description: 'Sensor types; the first entry is for making the first one start with ordinal 1'
-    SensorValue:
-      description: 'A sensor value correspondents to a measurement taken by a sensor'
+          type: boolean
       type: object
+    SensorType:
+      description: Sensor types; the first entry is for making the first one start
+        with ordinal 1
+      enum:
+      - NOT_USED
+      - POWER_PT1
+      - POWER_PT2
+      - POWER_CT1
+      - POWER_CT2
+      - POWER_AC
+      - POWER_AP
+      - GAS_METER
+      - TEMP
+      - HUMID
+      - WATER
+      - GAS_SENSOR
+      - HYDRO
+      - STATUS
+      - VOLTAGE_LEVEL
+      - CURRENT_LEVEL
+      type: string
+    SensorValue:
+      description: A sensor value correspondents to a measurement taken by a sensor
+      example:
+        sensor:
+          name: name
+          description: description
+          id: 2
+          mqttTopic:
+            path: path
+            id: 2
+          type: null
+          parameters:
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+          - parameterType: String
+            readonly: false
+            name: name
+            id: 4
+            value: "{}"
+        value: 0.8008281904610115
+        timestamp: 2000-01-23T04:56:07.000+00:00
       properties:
         sensor:
           $ref: '#/components/schemas/Sensor'
         timestamp:
-          description: 'date-time of occurrence'
-          type: string
+          description: date-time of occurrence
           format: date-time
+          type: string
         value:
-          type: number
           format: double
+          type: number
+      type: object
+    SensorValueListResponse:
+      title: List of users
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ListResponseMetaData'
+        - properties:
+            result:
+              type: array
+              items:
+                $ref: '#/components/schemas/SensorValue'
     MqttConfig:
+      description: Operational parameters for connecting to the MQTT broker
+      example:
+        clientId: '5.962133916683182'
+        topics:
+        - path: path
+          id: 2
+        - path: path
+          id: 2
+        id: 1
+        userId: '5.637376656633329'
+        url: url
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         clientId:
+          description: The unique identification on the mqtt broker
           type: number
-          description: 'The unique identification on the mqtt broker'
         userId:
+          description: The user reference for logging into the mqtt broker
           type: number
-          description: 'The user reference for logging into the mqtt broker'
         url:
+          description: The url of the mqtt broker (tcp://localhost:1883)
           type: string
-          description: 'The url of the mqtt broker (tcp://localhost:1883)'
         topics:
-          description: 'The configured topics for the mqtt broker'
+          description: The configured topics for the mqtt broker
           items:
             $ref: '#/components/schemas/MqttTopic'
-      description: 'Operational parameters for connecting to the MQTT broker'
+          type: array
     MqttTopic:
+      description: The configured topics for the local mqtt broker
+      example:
+        path: path
+        id: 2
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         path:
+          description: the mqtt topic path e.g. home1/0/fusebox/p1/pact1
           type: string
-          description: 'the mqtt topic path e.g. home1/0/fusebox/p1/pact1'
       type: object
-      description: 'The configured topics for the local mqtt broker'
     Actuator:
-      type: object
-      description: 'An actuator can operate devices. The P1 smart meter is an example of such a device'
+      description: An actuator can operate devices. The P1 smart meter is an example
+        of such a device
+      example:
+        name: name
+        description: description
+        id: 7
+        mqttTopic:
+          path: path
+          id: 2
+        parameters:
+        - parameterType: String
+          readonly: false
+          name: name
+          id: 4
+          value: "{}"
+        - parameterType: String
+          readonly: false
+          name: name
+          id: 4
+          value: "{}"
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         name:
           type: string
         description:
           type: string
         parameters:
           items:
-            $ref: "#/components/schemas/DomiotParameter"
+            $ref: '#/components/schemas/DomiotParameter'
+          type: array
         mqttTopic:
           $ref: '#/components/schemas/MqttTopic'
-    Command:
       type: object
-      description: 'A command is an event to act on a sensor value or timer'
+    Command:
+      description: A command is an event to act on a sensor value or timer
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
         predicateActionList:
-          type: object
           additionalProperties:
-            type: object
-            properties:
-              predicate:
-                type: object
-                additionalProperties:
-                  type: object
-                  properties:
-                    parameter:
-                      type: string
-                      description: 'The parameter that is to be inspected'
-                    value:
-                      type: string
-                      description: 'Relational specification of the parameter value ( using <, >, ==, )'
-              action:
-                type: object
-                properties:
-                  id:
-                    $ref: '#/components/schemas/Id'
-                  delay:
-                    type: integer
-                    description: 'How many ms should be waited before executing the action'
-                  actionCommand:
-                    type: string
-                    description: 'TODO: Should we put an mqtt command in here?'
+            $ref: '#/components/schemas/Command_predicateActionList_value'
+          type: object
+      type: object
+    Command_predicateActionList_value_predicate_value:
+      properties:
+        parameter:
+          description: The parameter that is to be inspected
+          type: string
+        value:
+          description: "Relational specification of the parameter value ( using <,\
+            \ >, ==, )"
+          type: string
+      type: object
+    Command_predicateActionList_value_action:
+      properties:
+        id:
+          description: unique identification
+          format: int64
+          readOnly: true
+          type: integer
+        delay:
+          description: How many ms should be waited before executing the action
+          type: integer
+        actionCommand:
+          description: "TODO: Should we put an mqtt command in here?"
+          type: string
+      type: object
+    Command_predicateActionList_value:
+      properties:
+        predicate:
+          additionalProperties:
+            $ref: '#/components/schemas/Command_predicateActionList_value_predicate_value'
+          type: object
+        action:
+          $ref: '#/components/schemas/Command_predicateActionList_value_action'
+      type: object
+    ListResponseMetaData:
+      title: List response Meta Data
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: total
+          example: 100
+        offset:
+          type: integer
+          format: int32
+          description: offset
+          example: 150
+        limit:
+          type: integer
+          format: int32
+          description: limit
+          example: 20
+
   securitySchemes:
     BasicAuth:
-      type: http
       scheme: basic
-    BearerAuth:
       type: http
-      scheme: bearer
+    BearerAuth:
       bearerFormat: jwt
+      scheme: bearer
+      type: http
     ApiKeyAuth:
-      type: apiKey
       in: header
       name: X-API-Key
+      type: apiKey

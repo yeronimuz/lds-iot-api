@@ -38,7 +38,8 @@ openApiGenerate {
     outputDir = "$rootDir/"
     configOptions = [
             "useJakartaEe": "true",
-            "delegatePattern": "true"
+            "delegatePattern": "true",
+            "useOriginalPathParamNames": "true"
     ]
 }
 

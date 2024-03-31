@@ -34,6 +34,21 @@ paths:
       x-accepts: application/json
       x-tags:
       - tag: Site
+    get:
+      operationId: getSites
+      description: Get all sites
+      tags:
+      - Site
+      responses:
+         "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Site'
+                type: array
+          description: Sites
+
   /site/{siteId}:
     get:
       operationId: getSite
@@ -347,13 +362,11 @@ paths:
         style: form
       responses:
         "200":
+          description: Sensor values retrieved
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/SensorValueListResponse'
-                type: array
-          description: Sensor values retrieved
+                $ref: '#/components/schemas/SensorValueListResponse'
         "204":
           description: No sensor values were found
       summary: Get sensor values
@@ -934,6 +947,10 @@ components:
         mqttTopic:
           $ref: '#/components/schemas/MqttTopic'
       type: object
+      required:
+        - id
+        - type
+        - mqttTopic
     DomiotParameter:
       example:
         parameterType: String
@@ -984,6 +1001,10 @@ components:
       type: string
     SensorValue:
       description: A sensor value correspondents to a measurement taken by a sensor
+      required:
+        - sensor
+        - timestamp
+        - value
       example:
         sensor:
           name: name

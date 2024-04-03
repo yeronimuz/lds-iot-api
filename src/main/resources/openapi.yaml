@@ -337,7 +337,7 @@ paths:
         explode: true
         in: query
         name: sensorId
-        required: true
+        required: false
         schema:
           type: integer
         style: form

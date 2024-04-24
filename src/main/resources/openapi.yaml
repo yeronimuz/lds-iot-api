@@ -1,16 +1,17 @@
 openapi: 3.0.3
 info:
-  description: Lankheet Domotics API
-  title: Lankheet Domotics api
-  version: 1.0.1
+  description: Domotics API
+  title: Domotics api
+  version: 1.2.0
 servers:
-- url: /rest/domiot-iot-rest/v1
+- url: http://rpi1bplus/api/v1
 security:
 - apiKeyAuth: []
 tags:
 - name: Site
 - name: Device
 - name: User
+- name: SensorValue
 paths:
   /site:
     post:
@@ -331,35 +332,44 @@ paths:
     get:
       operationId: getSensorValues
       parameters:
-      - $ref: '#/components/parameters/PaginationOffsetParam'
-      - $ref: '#/components/parameters/PaginationLimitParam'
-      - description: Id of the sensor
+      - name: sensorIds
+        description: Ids of the sensors for which sensor values are requested
         explode: true
         in: query
-        name: sensorId
-        required: false
+        required: true
         schema:
-          type: integer
+          type: array
+          items:
+            type: integer
+            format: int64
         style: form
-      - description: Start time of the requested period of Sensor Values
+      - name: start
+        description: Start time of the requested period of Sensor Values
         explode: true
         in: query
-        name: start
         required: true
         schema:
           format: date-time
           type: string
         style: form
-      - allowEmptyValue: true
+      - name: end
         description: End time of the requested period of Sensor Values
         explode: true
         in: query
-        name: end
+        allowEmptyValue: true
         required: true
         schema:
           format: date-time
           type: string
         style: form
+      - name: sampling_time
+        description: The sampling time in seconds
+        explode: true
+        in: query
+        allowEmptyValue: true
+        required: false
+        schema:
+          type: integer
       responses:
         "200":
           description: Sensor values retrieved
@@ -375,26 +385,83 @@ paths:
       x-accepts: application/json
       x-tags:
       - tag: SensorValue
+  /sensor-values/graph:
+    get:
+      operationId: getSensorValueGraphData
+      parameters:
+        - name: sensorIds
+          description: Ids of the sensors for which graph data is requested
+          explode: true
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+          style: form
+        - name: start
+          description: Start time of the requested period of Sensor Values
+          explode: true
+          in: query
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - name: end
+          description: End time of the requested period of Sensor Values
+          explode: true
+          in: query
+          allowEmptyValue: true
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - name: sampling_time
+          description: The sampling time in seconds
+          explode: true
+          in: query
+          allowEmptyValue: true
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sensor values retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorValueGraphResponse'
+        "204":
+          description: No sensor values were found
+      summary: Get sensor value graph data
+      tags:
+        - SensorGraphData
+      x-accepts: application/json
+      x-tags:
+        - tag: SensorGraphData
 components:
   parameters:
     PaginationOffsetParam:
       in: query
-      name: offset
+      name: page-number
       required: false
       schema:
         type: integer
         minimum: 0
-      description: The number of items to skip before starting to collect the result set.
+      description: The page number to request for the paginated set of items.
       example: 0
     PaginationLimitParam:
       in: query
-      name: limit
+      name: page-size
       required: false
       schema:
         type: integer
         minimum: 0
-        maximum: 200
-      description: The maximum number of items to return, the maximum numbers of items to return is set to 200.
+        maximum: 500
+      description: The maximum number of items to return.
       example: 20
   schemas:
     Id:
@@ -909,25 +976,6 @@ components:
           type: string
       type: object
     Sensor:
-      example:
-        name: name
-        description: description
-        id: 2
-        mqttTopic:
-          path: path
-          id: 2
-        type: null
-        parameters:
-        - parameterType: String
-          readonly: false
-          name: name
-          id: 4
-          value: "{}"
-        - parameterType: String
-          readonly: false
-          name: name
-          id: 4
-          value: "{}"
       properties:
         id:
           description: unique identification
@@ -1002,34 +1050,12 @@ components:
     SensorValue:
       description: A sensor value correspondents to a measurement taken by a sensor
       required:
-        - sensor
+        - sensorId
         - timestamp
         - value
-      example:
-        sensor:
-          name: name
-          description: description
-          id: 2
-          mqttTopic:
-            path: path
-            id: 2
-          type: null
-          parameters:
-          - parameterType: String
-            readonly: false
-            name: name
-            id: 4
-            value: "{}"
-          - parameterType: String
-            readonly: false
-            name: name
-            id: 4
-            value: "{}"
-        value: 0.8008281904610115
-        timestamp: 2000-01-23T04:56:07.000+00:00
       properties:
-        sensor:
-          $ref: '#/components/schemas/Sensor'
+        sensorId:
+          $ref: '#/components/schemas/Id'
         timestamp:
           description: date-time of occurrence
           format: date-time
@@ -1039,15 +1065,85 @@ components:
           type: number
       type: object
     SensorValueListResponse:
-      title: List of users
       type: object
-      allOf:
-        - $ref: '#/components/schemas/ListResponseMetaData'
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: '#/components/schemas/SensorValue'
+      properties:
+        series:
+          type: array
+          items:
+            $ref: "#/components/schemas/SensorValueSeriesItem"
+    SensorValueSeriesItem:
+      title: List of Sensor Values
+      type: object
+      properties:
+        total:
+          description: The number of entries before sampling
+          type: integer
+          format: number
+        min:
+          description: The minimum value in the data set
+          type: number
+          format: double
+        max:
+          description: The maximum value in the data set
+          type: number
+          format: double
+        samplingFactor:
+          description: Data filtering by removing all except every x-th value
+          type: integer
+          format: int32
+        sensor:
+          $ref: '#/components/schemas/Sensor'
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/SensorValue'
+    GraphMetadata:
+      type: object
+      description: A statistical reference for the graph data (min, max, total and sampling time)
+      properties:
+        total:
+          description: The total number of data in the database
+          type: integer
+          format: int32
+        samplingFactor:
+          description: 0 and 1 means no sampling. Greater than 1 means dropping values so that only every {samplingFactor} seconds a value is present
+          type: integer
+          format: int32
+        min:
+          type: number
+          format: double
+        max:
+          type: number
+          format: double
+    NameMinMaxMap:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/GraphMetadata'
+    NgxChartsData:
+      description: Graphical sensor data
+      properties:
+        name:
+          description: Label of the sensor value set
+          type: string
+        series:
+          description: The value pairs
+          type: array
+          items:
+            properties:
+              name:
+                type: string
+              value:
+                type: number
+                format: double
+    SensorValueGraphResponse:
+      description: The return type of the webservice for processing graphical views of sensor data
+      properties:
+        metaData:
+          $ref: "#/components/schemas/NameMinMaxMap"
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/NgxChartsData"
     MqttConfig:
       description: Operational parameters for connecting to the MQTT broker
       example:
@@ -1188,12 +1284,12 @@ components:
           format: int64
           description: total
           example: 100
-        offset:
+        page-number:
           type: integer
           format: int32
-          description: offset
-          example: 150
-        limit:
+          description: page-number
+          example: 15
+        page-size:
           type: integer
           format: int32
           description: limit

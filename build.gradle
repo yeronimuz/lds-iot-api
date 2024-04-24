@@ -32,7 +32,8 @@ openApiValidate {
 }
 
 openApiGenerate {
-    generatorName = 'jaxrs-spec'
+//    generatorName = 'jaxrs-spec'
+    generatorName = 'spring'
     inputSpec = "$rootDir/src/main/resources/openapi.yaml"
     configFile = "$rootDir/src/main/resources/config.yaml"
     outputDir = "$rootDir/"
@@ -62,7 +63,7 @@ clean {
 tasks.register('fixJavaxJakarta') {
     doLast {
         ant.replaceregexp(match: 'import javax', replace: 'import jakarta', flags: 'g', byline: true) {
-            fileset(dir: "$rootDir/src/gen/java/org/lankheet/domiot/api", includes: "*.java")
+            fileset(dir: "$rootDir/src/main/java/org/lankheet/domiot/api", includes: "*.java")
         }
     }
 }

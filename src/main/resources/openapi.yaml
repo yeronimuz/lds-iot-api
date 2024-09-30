@@ -362,8 +362,8 @@ paths:
           format: date-time
           type: string
         style: form
-      - name: sampling_time
-        description: The sampling time in seconds
+      - name: sampling_factor
+        description: The sampling factor, taking a sample every x values
         explode: true
         in: query
         allowEmptyValue: true
@@ -419,14 +419,6 @@ paths:
             format: date-time
             type: string
           style: form
-        - name: sampling_time
-          description: The sampling time in seconds
-          explode: true
-          in: query
-          allowEmptyValue: true
-          required: false
-          schema:
-            type: integer
       responses:
         "200":
           description: Sensor values retrieved

@@ -9,7 +9,7 @@ plugins {
     id 'org.openapi.generator' version '6.6.0'
     id 'maven-publish'
     id 'java-gradle-plugin'
-    id 'net.nemerosa.versioning' version '2.8.2'
+    id 'net.nemerosa.versioning' version '3.1.0'
 }
 
 repositories {
@@ -20,10 +20,10 @@ repositories {
 dependencies {
     compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.12.0'
-    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.52'
+    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.59'
     implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.20'
     implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.20'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.2.3'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.3.2'
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
 }
 

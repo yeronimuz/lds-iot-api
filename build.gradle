@@ -23,7 +23,7 @@ dependencies {
     implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.59'
     implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.20'
     implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.20'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.3.2'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.3.5'
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
 }
 
@@ -68,6 +68,7 @@ tasks.register('fixJavaxJakarta') {
     }
 }
 
+tasks.openApiGenerate.dependsOn('processResources')
 tasks.fixJavaxJakarta.dependsOn('openApiGenerate')
 tasks.compileJava.dependsOn('fixJavaxJakarta')
 tasks.publishToMavenLocal.dependsOn('compileJava')

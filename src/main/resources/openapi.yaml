@@ -1013,7 +1013,7 @@ components:
           - Boolean
           type: string
         value:
-          type: object
+          type: string
         readonly:
           default: false
           type: boolean

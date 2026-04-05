@@ -6,7 +6,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.openapi.generator' version '6.6.0'
+    id 'org.openapi.generator' version '7.21.0'
     id 'maven-publish'
     id 'java-gradle-plugin'
     id 'net.nemerosa.versioning' version '3.1.0'
@@ -18,12 +18,14 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.12.0'
-    implementation group: 'io.swagger.codegen.v3', name: 'swagger-generator', version: '3.0.59'
-    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations-jakarta', version: '2.2.20'
-    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.20'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.3.5'
+    compileOnly("jakarta.platform:jakarta.jakartaee-api:11.0.0")
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+//    implementation 'io.swagger.codegen.v3:swagger-generator:3.0.59'
+    implementation("io.swagger.codegen.v3:swagger-codegen:3.0.78")
+    implementation 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.46'
+    implementation 'io.swagger.core.v3:swagger-jaxrs2:2.2.20'
+    implementation 'org.springframework.boot:spring-boot-starter-web:4.0.5'
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
 }
 
@@ -45,6 +47,9 @@ openApiGenerate {
 }
 
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
     withSourcesJar()
 }
 
@@ -60,25 +65,17 @@ clean {
    delete "$rootDir/src/gen/"
 }
 
-tasks.register('fixJavaxJakarta') {
-    doLast {
-        ant.replaceregexp(match: 'import javax', replace: 'import jakarta', flags: 'g', byline: true) {
-            fileset(dir: "$rootDir/src/main/java/org/lankheet/domiot/api", includes: "*.java")
-        }
-    }
-}
-
 tasks.openApiGenerate.dependsOn('processResources')
-tasks.fixJavaxJakarta.dependsOn('openApiGenerate')
-tasks.compileJava.dependsOn('fixJavaxJakarta')
+tasks.sourcesJar.dependsOn('openApiGenerate')
+tasks.compileJava.dependsOn('sourcesJar')
 tasks.publishToMavenLocal.dependsOn('compileJava')
 
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId findProperty('group')
-            artifactId findProperty('name')
-            version findProperty('version') + '-' + findProperty('classifier')
+            groupId = findProperty('group') as String
+            artifactId = findProperty('name') as String
+            version = "${findProperty('version')}-${findProperty('classifier')}"
 
             from components.java
         }

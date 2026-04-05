@@ -1,0 +1,9 @@
+npmName: "@lankheet/domiot-rest-api"
+npmVersion: "1.4.0-SNAPSHOT"
+ngVersion: "17"
+useSingleRequestParameter: false
+withInterfaces: true
+useTags: true
+modelTests: false
+apiTests: false
+

@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 buildscript {
     repositories {
         mavenLocal()
@@ -65,7 +67,34 @@ clean {
    delete "$rootDir/src/gen/"
 }
 
+// TypeScript client generation using OpenAPI Generator
+
+def tsOutputDir = "${layout.buildDirectory}/generated-clients/typescript-angular"
+
+tasks.register('openApiGenerateTypescript', GenerateTask) {
+    generatorName = 'typescript-angular'
+    inputSpec     = "$rootDir/src/main/resources/openapi.yaml"
+    configFile    = "$rootDir/src/main/resources/config-typescript.yaml"
+    outputDir     = tsOutputDir
+}
+
+tasks.register('npmInstallTypescript', Exec) {
+    dependsOn 'openApiGenerateTypescript'
+    workingDir tsOutputDir
+    commandLine 'npm', 'install'
+}
+
+tasks.register('npmPackTypescript', Exec) {
+    dependsOn 'npmInstallTypescript'
+    workingDir tsOutputDir
+    commandLine 'npm', 'pack', '--pack-destination', "${layout.buildDirectory}/libs"
+    description = 'Generates and packs the Angular TypeScript client as an npm .tgz into build/libs'
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 tasks.openApiGenerate.dependsOn('processResources')
+tasks.openApiGenerateTypescript.dependsOn('processResources')
 tasks.sourcesJar.dependsOn('openApiGenerate')
 tasks.compileJava.dependsOn('sourcesJar')
 tasks.publishToMavenLocal.dependsOn('compileJava')

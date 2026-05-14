@@ -1,7 +1,7 @@
-apiPackage: org.lankheet.domiot.api
-invokerPackage: org.lankheet.domiot.invoker
-modelPackage: org.lankheet.domiot.model
-configPackage: org.lankheet.domiot.config
+apiPackage: org.domiot.api
+invokerPackage: org.domiot.invoker
+modelPackage: org.domiot.model
+configPackage: org.domiot.config
 dateLibrary: java8-localdatetime
 interfaceOnly: true
 serializableModel: true

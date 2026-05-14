@@ -23,11 +23,10 @@ dependencies {
     compileOnly("jakarta.platform:jakarta.jakartaee-api:11.0.0")
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
-//    implementation 'io.swagger.codegen.v3:swagger-generator:3.0.59'
-    implementation("io.swagger.codegen.v3:swagger-codegen:3.0.78")
+    implementation("io.swagger.codegen.v3:swagger-codegen:3.0.79")
     implementation 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.46'
     implementation 'io.swagger.core.v3:swagger-jaxrs2:2.2.20'
-    implementation 'org.springframework.boot:spring-boot-starter-web:4.0.5'
+    implementation 'org.springframework.boot:spring-boot-starter-web:4.0.6'
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
 }
 
@@ -69,13 +68,18 @@ clean {
 
 // TypeScript client generation using OpenAPI Generator
 
-def tsOutputDir = "${layout.buildDirectory}/generated-clients/typescript-angular"
+def tsOutputDir = layout.buildDirectory.dir("generated-clients/typescript-angular").get().asFile.absolutePath
+def tsPackDestination = layout.buildDirectory.dir("libs").get().asFile.absolutePath
+def ngVersion = (findProperty('ngVersion') ?: '19.0.0') as String
 
 tasks.register('openApiGenerateTypescript', GenerateTask) {
     generatorName = 'typescript-angular'
     inputSpec     = "$rootDir/src/main/resources/openapi.yaml"
     configFile    = "$rootDir/src/main/resources/config-typescript.yaml"
     outputDir     = tsOutputDir
+    additionalProperties = [
+            ngVersion: ngVersion
+    ]
 }
 
 tasks.register('npmInstallTypescript', Exec) {
@@ -87,8 +91,12 @@ tasks.register('npmInstallTypescript', Exec) {
 tasks.register('npmPackTypescript', Exec) {
     dependsOn 'npmInstallTypescript'
     workingDir tsOutputDir
-    commandLine 'npm', 'pack', '--pack-destination', "${layout.buildDirectory}/libs"
+    commandLine 'npm', 'pack', '--pack-destination', tsPackDestination
     description = 'Generates and packs the Angular TypeScript client as an npm .tgz into build/libs'
+}
+
+tasks.named('processTestResources') {
+    enabled = false
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

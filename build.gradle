@@ -71,6 +71,7 @@ clean {
 def tsOutputDir = layout.buildDirectory.dir("generated-clients/typescript-angular").get().asFile.absolutePath
 def tsPackDestination = layout.buildDirectory.dir("libs").get().asFile.absolutePath
 def ngVersion = (findProperty('ngVersion') ?: '19.0.0') as String
+def npmExecutable = (findProperty('npmExecutable') ?: 'npm') as String
 
 tasks.register('openApiGenerateTypescript', GenerateTask) {
     generatorName = 'typescript-angular'
@@ -85,13 +86,13 @@ tasks.register('openApiGenerateTypescript', GenerateTask) {
 tasks.register('npmInstallTypescript', Exec) {
     dependsOn 'openApiGenerateTypescript'
     workingDir tsOutputDir
-    commandLine 'npm', 'install'
+    commandLine npmExecutable, 'install'
 }
 
 tasks.register('npmPackTypescript', Exec) {
     dependsOn 'npmInstallTypescript'
     workingDir tsOutputDir
-    commandLine 'npm', 'pack', '--pack-destination', tsPackDestination
+    commandLine npmExecutable, 'pack', '--pack-destination', tsPackDestination
     description = 'Generates and packs the Angular TypeScript client as an npm .tgz into build/libs'
 }
 

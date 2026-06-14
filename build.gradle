@@ -1,4 +1,6 @@
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 buildscript {
     repositories {
@@ -39,7 +41,8 @@ openApiGenerate {
     generatorName = 'spring'
     inputSpec = "$rootDir/src/main/resources/openapi.yaml"
     configFile = "$rootDir/src/main/resources/config.yaml"
-    outputDir = "$rootDir/"
+    // Keep generated server artifacts isolated to avoid output/input overlap warnings.
+    outputDir = "$rootDir/src/gen"
     configOptions = [
             "useJakartaEe": "true",
             "delegatePattern": "true",
@@ -70,8 +73,41 @@ clean {
 
 def tsOutputDir = layout.buildDirectory.dir("generated-clients/typescript-angular").get().asFile.absolutePath
 def tsPackDestination = layout.buildDirectory.dir("libs").get().asFile.absolutePath
-def ngVersion = (findProperty('ngVersion') ?: '19.0.0') as String
-def npmExecutable = (findProperty('npmExecutable') ?: 'npm') as String
+// Single source of truth for Angular compatibility of the generated client.
+def ngVersion = (findProperty('ngVersion') ?: '22.0.1') as String
+
+def resolveNpmExecutable = {
+    def fromProperty = findProperty('npmExecutable') as String
+    if (fromProperty) {
+        return fromProperty
+    }
+
+    def fromEnv = System.getenv('NPM_EXECUTABLE')
+    if (fromEnv) {
+        return fromEnv
+    }
+
+    def home = System.getProperty('user.home')
+    def nvmCandidates = fileTree("${home}/.nvm/versions/node") {
+        include '*/bin/npm'
+    }.files.sort { a, b -> b.path <=> a.path }
+
+    def fixedCandidates = [
+            '/usr/bin/npm',
+            '/usr/local/bin/npm',
+            '/opt/homebrew/bin/npm'
+    ].collect { file(it) }
+
+    def firstExistingAbsolute = (nvmCandidates + fixedCandidates).find { it.exists() && it.canExecute() }
+    if (firstExistingAbsolute != null) {
+        return firstExistingAbsolute.absolutePath
+    }
+
+    // Final fallback: rely on PATH for environments where npm is globally available.
+    return 'npm'
+}
+
+def npmExecutable = resolveNpmExecutable()
 
 tasks.register('openApiGenerateTypescript', GenerateTask) {
     generatorName = 'typescript-angular'
@@ -83,10 +119,95 @@ tasks.register('openApiGenerateTypescript', GenerateTask) {
     ]
 }
 
-tasks.register('npmInstallTypescript', Exec) {
+tasks.register('normalizeTypescriptPackageForNg', DefaultTask) {
     dependsOn 'openApiGenerateTypescript'
+
+    def packageJsonFile = file("$tsOutputDir/package.json")
+    def markerFile = layout.buildDirectory.file("tmp/normalizeTypescriptPackageForNg.marker")
+    def legacyMarkerInPackageRoot = file("$tsOutputDir/.package-normalized-for-ng")
+
+    def resolveTargetVersions = {
+        def major = ngVersion.tokenize('.').first()
+        [
+                major          : major,
+                ngPackagrRange : "^${major}.0.0",
+                typescriptRange: major == '22' ? '>=6.0.0 <6.1.0' : null
+        ]
+    }
+
+    // Task state is driven by ngVersion and current generated files.
+    inputs.property('ngVersion', ngVersion)
+    outputs.file(markerFile)
+    // This task mutates generated files; avoid stale up-to-date snapshots on rewritten package.json.
+    outputs.upToDateWhen { false }
+
+    onlyIf {
+        if (!packageJsonFile.exists()) {
+            return false
+        }
+
+        def targets = resolveTargetVersions()
+        def json = new JsonSlurper().parse(packageJsonFile)
+        def devDependencies = (json.devDependencies instanceof Map) ? json.devDependencies : [:]
+
+        def ngPackagrMismatch = devDependencies['ng-packagr'] != targets.ngPackagrRange
+        def typescriptMismatch = targets.typescriptRange != null && devDependencies['typescript'] != targets.typescriptRange
+        def hasStaleLockFiles = [
+                file("$tsOutputDir/package-lock.json"),
+                file("$tsOutputDir/npm-shrinkwrap.json")
+        ].any { it.exists() }
+
+        ngPackagrMismatch || typescriptMismatch || hasStaleLockFiles || legacyMarkerInPackageRoot.exists()
+    }
+
+    doLast {
+        if (!packageJsonFile.exists()) {
+            throw new GradleException("Generated package.json not found at ${packageJsonFile}")
+        }
+
+        def targets = resolveTargetVersions()
+
+        def json = new JsonSlurper().parse(packageJsonFile)
+        if (!(json.devDependencies instanceof Map)) {
+            json.devDependencies = [:]
+        }
+
+        // Force ng-packagr major to align with Angular major to avoid npm ERESOLVE.
+        json.devDependencies['ng-packagr'] = targets.ngPackagrRange
+        // Angular 22 toolchain requires TypeScript 6.x.
+        if (targets.typescriptRange != null) {
+            json.devDependencies['typescript'] = targets.typescriptRange
+        }
+
+        packageJsonFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(json)) + '\n'
+
+        // Drop stale lockfiles so npm resolves dependencies from the patched package.json.
+        [
+                file("$tsOutputDir/package-lock.json"),
+                file("$tsOutputDir/npm-shrinkwrap.json")
+        ].findAll { it.exists() }.each { it.delete() }
+
+        // Remove legacy marker from package root so it is never included in the .tgz.
+        if (legacyMarkerInPackageRoot.exists()) {
+            legacyMarkerInPackageRoot.delete()
+        }
+
+        def marker = markerFile.get().asFile
+        marker.parentFile.mkdirs()
+        marker.text = "ngVersion=${ngVersion}\n"
+    }
+}
+
+tasks.register('npmInstallTypescript', Exec) {
+    dependsOn 'normalizeTypescriptPackageForNg'
     workingDir tsOutputDir
     commandLine npmExecutable, 'install'
+
+    // Incremental: rerun only when npm dependency manifests change or node_modules is missing.
+    inputs.files(fileTree(tsOutputDir) {
+        include 'package.json', 'package-lock.json', 'npm-shrinkwrap.json'
+    })
+    outputs.dir("$tsOutputDir/node_modules")
 }
 
 tasks.register('npmPackTypescript', Exec) {
@@ -94,6 +215,24 @@ tasks.register('npmPackTypescript', Exec) {
     workingDir tsOutputDir
     commandLine npmExecutable, 'pack', '--pack-destination', tsPackDestination
     description = 'Generates and packs the Angular TypeScript client as an npm .tgz into build/libs'
+
+    // Incremental: rerun only when generated package sources/manifests changed.
+    inputs.files(fileTree(tsOutputDir) {
+        exclude 'node_modules/**', '.git/**', '.openapi-generator/**', '*.tgz'
+    })
+    outputs.files(fileTree(tsPackDestination) {
+        include '*.tgz'
+    })
+}
+
+// Ensure every Gradle build also produces the packaged TypeScript client (.tgz)
+tasks.named('build') {
+    dependsOn 'npmPackTypescript'
+}
+
+// Ensure assemble also produces the packaged TypeScript client (.tgz)
+tasks.named('assemble') {
+    dependsOn 'npmPackTypescript'
 }
 
 tasks.named('processTestResources') {

@@ -474,12 +474,22 @@ components:
         email-address: email-address
         id: 1
         status: ACTIVE
+      type: object
+      required:
+        - username
+        - email-address
       properties:
         id:
           description: unique identification
           format: int64
           readOnly: true
           type: integer
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
         role:
           $ref: '#/components/schemas/Role'
         password:
